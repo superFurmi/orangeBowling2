@@ -6,8 +6,6 @@
 package bowling;
 
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,39 +15,34 @@ import java.util.logging.Logger;
  */
 public class BowlingGame {
     
-    final int nSize = 10;
+    final private int nSize = 10;
     
     // flaga, czy właśnie zaczynamy nową turę
-    protected boolean bNewFrame;
+    private boolean bNewFrame;
     
     // ile zostało słupków do zbicia w tej turze
-    protected int nPinFrameNumber;
+    private int nPinFrameNumber;
     
     // którą mamy turę
     // -1 to koniec gry
-    protected int nActualFrame;
+    private int nActualFrame;
     
     // punkty w każdej turze
-    protected int [] nPoints;
+    private int [] nPoints;
     
     // czym zakończyła się każda tura (zawsze na tablicy widać punkty i ten typ)
     // 0 - normalny, 1 - spare, 2 - strike
-    protected int [] nEndType;
+    private int [] nEndType;
     
     // ile razy jeszcze mamy dodawać punkty
     // 0 - normalny, 1 - spare, 2 - strike
-    protected int [] nAddType;
+    private int [] nAddType;
     
     // można by było to zrobić strukturami FIFO (np. kolejka) i wstawiać rekordy na strike oraz spare, ale tablica typów nam już wszystko załatwia
     
     
     //tworząc nowy obiekt zakładamy nową grę
     BowlingGame () {
-        newGame ();
-    }
-    
-    // zerujemy wszystkie dane - zaczynamy nową grę
-    public void newGame () {
         bNewFrame = true;
         nPinFrameNumber = 10;
         nActualFrame = 1;
@@ -60,19 +53,19 @@ public class BowlingGame {
         nAddType = new int [nSize];
     }
     
-    
     public void roll (int pins) {
         
+        // sprawdzanie, czy gra skończona
+        if (nActualFrame == -1)
+            throw new IllegalArgumentException ("Nie można już rzucać, gra się skończyła.");
+        
         // sprawdzanie oszustów
-        if (pins > nPinFrameNumber) {
-            System.out.println("Oszukańczy oszust chciał zbić więcej niż się da. Za kare ma 0 punktów - niech się nauczy nie oszukiwać");
-            pins = 0;
-        }
+        if (pins > nPinFrameNumber)
+            throw new IllegalArgumentException ("Oszukańczy oszust chciał zbić więcej niż się da.");
         
         // sprawdzanie, czy gra skończona
-        if (nActualFrame == -1) {
-            return;
-        }
+        if (pins < 0)
+            throw new IllegalArgumentException ("Nie można przewrócić ujemnej liczby pachołków.");
         
         nPinFrameNumber -= pins;
         if (nActualFrame < 11 )
@@ -100,25 +93,31 @@ public class BowlingGame {
                 nEndType[nActualFrame - 1] = 1;
                 nAddType[nActualFrame - 1] = 1;
             }
+            bNewFrame = true;
+            nPinFrameNumber = 10;
+            nActualFrame++;
             
-            newFrame();
         }
         else {
             if (bNewFrame)
                 bNewFrame = false;
-            else 
-                newFrame();
+            else  {
+                bNewFrame = true;
+                nPinFrameNumber = 10;
+                nActualFrame++;
+            }
         }
         
+        // być może ten ruch zakończył grę
         if (nActualFrame > 10 && nAddType[9] == 0) {
-            Logger.getLogger( BowlingGame.class.getName() ).log( Level.SEVERE, "Gra skończona");
+            Logger.getLogger( BowlingGame.class.getName() ).log( Level.SEVERE, "Gra skończona.");
             nActualFrame = -1;
             return;
         }
         
     }
     
-    public int calculateScore () throws Exception {
+    public int calculateScore () {
         
         int nSum = 0;
         
@@ -126,10 +125,10 @@ public class BowlingGame {
             nSum += nValue;
         }
         
-        if (nSum > 300) {
-            nSum = 0;
-            throw new Exception("Nie da się mieć więcej niż 300 pkt. Oszust.");
-        }
+//        if (nSum > 300) {
+//            nSum = 0;
+//            throw new Exception("Nie da się mieć więcej niż 300 pkt. Oszust.");
+//        }
         
         return nSum;
     }
@@ -138,16 +137,9 @@ public class BowlingGame {
         return (nActualFrame == -1);
     }
     
-    public void OutputPoints () {
+    public void outputPoints () {
         System.out.println( Arrays.toString(nPoints) );
         System.out.println( Arrays.toString(nEndType) );
-    }
-    
-    // nowa tura
-    public void newFrame () {
-        bNewFrame = true;
-        nPinFrameNumber = 10;
-        nActualFrame++;
     }
 
     //<editor-fold defaultstate="collapsed" desc="gettery i settery">

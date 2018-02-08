@@ -5,7 +5,6 @@
  */
 package bowling;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -19,14 +18,13 @@ public class BowlingMain {
      */
     public static void main(String[] args) throws Exception {
         
-        BowlingGame myGame = new BowlingGame();
         Scanner scan = new Scanner(System.in);
         
         do {
-            myGame.newGame();
+            BowlingGame myGame = new BowlingGame();
             while (!myGame.isTheEnd()) {
                 myGame.roll(scan.nextInt());
-                myGame.OutputPoints();
+                myGame.outputPoints();
             }
             System.out.println("Gra skończona. Masz " + myGame.calculateScore() + " punktów." + ( (myGame.calculateScore() > 200) ? " Gratulacje!" : "") );
             System.out.println("Aby zacząć jeszcze raz napisz 'tak'.");
